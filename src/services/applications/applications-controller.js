@@ -1,26 +1,118 @@
-// /* eslint-disable camelcase */
-// import ApplicationsRepositories from './applications-repositories.js';
-// import response from '../../utils/response.js';
-// import InvariantError from '../../exceptions/invariant-error.js';
-// import NotFoundError from '../../exceptions/not-found-error.js';
+/* eslint-disable camelcase */
+import ApplicationsRepositories from './applications-repositories.js';
+import response from '../../utils/response.js';
+import InvariantError from '../../exceptions/invariant-error.js';
+import NotFoundError from '../../exceptions/not-found-error.js';
 
-// const applicationsRepositories = new ApplicationsRepositories();
+const applicationsRepositories = new ApplicationsRepositories();
 
-// export const createApplication = async (req, res, next) => {
-//   const { user_id, job_id, status } = req.validated;
+export const createApplication = async (req, res, next) => {
+  try {
+    const user_id = req.user.id;
+    const { id: job_id } = req.params;
 
-//   const application = await applicationsRepositories.createApplication({
-//     user_id,
-//     job_id,
-//     status
-//   });
+    const verifyJob = await applicationsRepositories.verifyJobExist(job_id);
+    if (!verifyJob) {
+      throw new NotFoundError('Lowongan tidak ditemukan atau sudah ditutup');
+    }
 
-//   if (!application) {
-//     return next(new InvariantError('Lamaran gagal ditambahkan'));
-//   }
+    const verifyApplication = await applicationsRepositories.verifyApplicationsExist({ user_id, job_id });
+    if (verifyApplication) {
+      throw new InvariantError('Anda sudah melamar pekerjaan ini');
+    }
 
-//   return response(res, 201, 'Lamaran berhasil ditambahkan', application);
-// };
+    const application = await applicationsRepositories.createApplication({
+      user_id,
+      job_id,
+    });
+
+    if (!application) {
+      return next(new InvariantError('Lamaran gagal ditambahkan'));
+    }
+
+    return response(res, 201, 'Lamaran berhasil ditambahkan', application);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getAllMyApplication = async (req, res, next) => {
+  try {
+    const user_id = req.user.id;
+
+    const applications = await applicationsRepositories.getAllMyApplications(user_id);
+
+    return response(res, 200, 'Lamaran berhasil ditampilkan', { applications });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getMyApplicationsById = async (req, res, next) => {
+  try {
+    const user_id = req.user.id;
+    const { id: application_id } = req.params;
+
+    const application = await applicationsRepositories.getMyApplicationsById({ application_id, user_id });
+
+    if (!application) {
+      throw new NotFoundError('Lamaran tidak ditemukan');
+    }
+
+    return response(res, 200, 'Lamaran berhasil ditampilkan', application);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getAllApplicationByJobId = async (req, res, next) => {
+  try {
+    const user_id = req.user.id;
+    const { id: job_id } = req.params;
+
+    const applications = await applicationsRepositories.getAllApplicationsByJobId({ user_id, job_id });
+
+    return response(res, 200, 'Data pelamar berhasi ditampilkan', { applications });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateStatusApplicationById = async (req, res, next) => {
+  try {
+    const user_id = req.user.id;
+    const { id: application_id } = req.params;
+    const { status } = req.validated;
+
+    const application = await applicationsRepositories.updateStatusApplicationById({ user_id, application_id, status });
+
+    if (!application) {
+      throw new NotFoundError('Data pelamar tidak ditemukan');
+    }
+    return response(res, 200, 'Status lamaran berhasil diperbarui', application);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getApplicationById = async (req, res, next) => {
+  try {
+    const user_id = req.user.id;
+    const {
+      jobId: job_id,
+      applicationId: application_id,
+    } = req.params;
+
+    const application = await applicationsRepositories.getApplicationById({ user_id, job_id, application_id });
+
+    if (!application) {
+      throw new NotFoundError('Data pelamar tidak ditemukan');
+    }
+    return response(res, 200, 'Data pelamar berhasi ditampilkan', application);
+  } catch (err) {
+    next(err);
+  }
+};
 
 // export const updateApplication = async (req, res, next) => {
 //   const { id } = req.params;

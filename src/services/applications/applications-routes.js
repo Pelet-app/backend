@@ -1,18 +1,20 @@
-// import { Router } from 'express';
+import { Router } from 'express';
 // import { getApplications, createApplication, deleteApplication, getApplicationsByUserId, getApplicationsByJobId, getApplicationsById, updateApplication } from './applications-controller.js';
-// import authenticateToken from '../../middlewares/auth.js';
-// import { validate } from '../../middlewares/validate.js';
-// import { createApplicationSchema, updateApplicationSchema } from './applications-schema.js';
+import { authenticateToken, hrdOnly } from '../../middlewares/auth.js';
+import { validate } from '../../middlewares/validate.js';
+import { createApplicationSchema, updateStatusApplicationSchema } from './applications-schema.js';
+import { createApplication, getAllApplicationByJobId, getAllMyApplication, getApplicationById, getMyApplicationsById, updateStatusApplicationById } from './applications-controller.js';
 
-// const router = Router();
+const router = Router();
 
-// router.post('/applications', authenticateToken, validate(createApplicationSchema), createApplication);
-// router.get('/applications', authenticateToken, getApplications);
-// router.get('/applications/:id', authenticateToken, getApplicationsById);
-// router.get('/applications/user/:userId', authenticateToken, getApplicationsByUserId);
-// router.get('/applications/job/:jobId', authenticateToken, getApplicationsByJobId);
+router.post('/jobs/:id/applications', authenticateToken, validate(createApplicationSchema), createApplication);
+router.get('/applications/mine', authenticateToken, getAllMyApplication);
+router.get('/applications/:id', authenticateToken, getMyApplicationsById);
 
-// router.put('/applications/:id', authenticateToken, validate(updateApplicationSchema), updateApplication);
-// router.delete('/applications/:id', authenticateToken, deleteApplication);
+// Sisi Hrd
+router.get('/jobs/:id/applications', authenticateToken, hrdOnly, getAllApplicationByJobId);
+router.get('/jobs/:jobId/applications/:applicationId', authenticateToken, hrdOnly, getApplicationById);
+router.put('/applications/:id', authenticateToken, hrdOnly, validate(updateStatusApplicationSchema), updateStatusApplicationById);
 
-// export default router;
+
+export default router;
