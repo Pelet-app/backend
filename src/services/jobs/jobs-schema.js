@@ -27,19 +27,14 @@ export const updateJobSchema = Joi.object({
 });
 
 export const listJobsQuerySchema = Joi.object({
-  category_id: Joi.string(),
-  company_id: Joi.string(),
-  title: Joi.string(),
+  categoryId: Joi.string(),
+  title: Joi.string().min(3),
   description: Joi.string(),
-  job_type: Joi.string().valid('full-time', 'part-time', 'contract'),
-  experience_level: Joi.string().valid('entry', 'mid', 'senior'),
-  location_type: Joi.string().valid('remote', 'onsite', 'hybrid'),
-  location_city: Joi.string(),
-  salary_min: Joi.number().integer(),
-  salary_max: Joi.number().integer(),
-  is_salary_visible: Joi.boolean(),
+  jobType: Joi.string().valid('full-time', 'part-time', 'freelance', 'internship'),
+  experienceLevel: Joi.string().valid('entry', 'mid', 'senior'),
+  locationType: Joi.string().valid('onsite', 'remote', 'hybrid'),
   status: Joi.string().valid('open', 'closed'),
-  search: Joi.string().optional(),
+  search: Joi.string(),
   page: Joi.number().integer().min(1).default(1),
   limit: Joi.number().integer().min(1).max(100).default(10),
 });

@@ -5,6 +5,7 @@ import jobs from '../services/jobs/jobs-routes.js';
 import applications from '../services/applications/applications-routes.js';
 import profiles from '../services/profiles/profiles-routes.js';
 import resumes from '../services/resumes/resumes-routes.js';
+import aiRoutes from '../services/ai/ai-routes.js';
 
 
 const router = Router();
@@ -15,5 +16,7 @@ router.use('/', authentications);
 router.use('/', jobs);
 router.use('/', applications);
 router.use('/', resumes);
+router.use('/', aiRoutes);
+
 
 export default router;

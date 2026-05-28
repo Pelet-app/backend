@@ -5,6 +5,7 @@ import ResumesRepositories from './resumes-repositories.js';
 import { nanoid } from 'nanoid';
 import { extractCvText } from '../../utils/extractCv.js';
 import AuthenticationError from '../../exceptions/authentication-error.js';
+import { extractSkillSection } from '../../utils/extractSkillSection.js';
 
 const resumeRepositories = new ResumesRepositories();
 
@@ -14,6 +15,7 @@ export const uploadResume = async (req, res, next) => {
     let filename;
     let filePath;
     let cvText = '';
+    let compressedCv = '';
 
     if (!req.user) {
       return next(new AuthenticationError('Unauthorized'));
@@ -25,6 +27,7 @@ export const uploadResume = async (req, res, next) => {
 
       try {
         cvText = await extractCvText(req.file.path);
+        compressedCv = extractSkillSection(cvText);
       } catch (error) {
         console.error(error);
       }
@@ -40,6 +43,7 @@ export const uploadResume = async (req, res, next) => {
     }
 
     const id = `doc-${nanoid(16)}`;
+    const created_at = new Date().toISOString();
 
     const document = await resumeRepositories.createDocument({
       id,
@@ -47,6 +51,8 @@ export const uploadResume = async (req, res, next) => {
       filename,
       path: filePath,
       cvText,
+      compressedCv,
+      created_at,
     });
 
     // TODO: AI skill extraction goes here in the next phase
@@ -55,7 +61,7 @@ export const uploadResume = async (req, res, next) => {
     return res.status(201).json({
       status: 'success',
       message: 'Resume berhasil diunggah',
-      data: { documentId: document.id, path: document.path, cv_text: document.cv_text },
+      data: { documentId: document.id, path: document.path, cv_text: document.cv_text, compressed_cv: document.compressed_cv },
     });
   } catch (err) {
     // Cleanup uploaded file if DB insert fails

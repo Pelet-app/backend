@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import pool from '../../database/index.js';
 import NotFoundError from '../../exceptions/not-found-error.js';
 import AuthorizationError from '../../exceptions/authorization-error.js';
@@ -7,12 +8,12 @@ class ResumesRepositories {
     this.pool = pool;
   }
 
-  async createDocument({ id, userId, filename, path, cvText }) {
+  async createDocument({ id, userId, filename, path, cvText, compressedCv, created_at }) {
     const query = {
-      text: `INSERT INTO documents (id, user_id, filename, path, cv_text)
-             VALUES ($1, $2, $3, $4, $5)
+      text: `INSERT INTO documents (id, user_id, filename, path, cv_text, compressed_cv, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)
              RETURNING *`,
-      values: [id, userId, filename, path, cvText],
+      values: [id, userId, filename, path, cvText, compressedCv, created_at],
     };
     const result = await pool.query(query);
     return result.rows[0];
@@ -20,7 +21,7 @@ class ResumesRepositories {
 
   async getDocumentsByUser(userId) {
     const query = {
-      text: `SELECT id, filename, path, cv_text, user_id
+      text: `SELECT id, filename, path, cv_text, compressed_cv, user_id, created_at
              FROM documents
              WHERE user_id = $1
              ORDER BY id DESC`,
