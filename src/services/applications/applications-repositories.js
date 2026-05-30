@@ -170,6 +170,25 @@ class ApplicationsRepositories {
     return result.rows[0];
   }
 
+  async updateStatusApplicationById({ user_id, application_id, status }) {
+    const query = {
+      text: `
+      UPDATE applications
+      SET status = $1
+      FROM jobs j
+      WHERE applications.id = $2
+      AND applications.job_id = j.id
+      AND j.hrd_id = $3
+      RETURNING applications.id AS application_id, applications.status, applications.created_at AS applied_at
+    `,
+      values: [status, application_id, user_id],
+    };
+
+    const result = await this.pool.query(query);
+
+    return result.rows[0];
+  }
+
   // async getApplicationById(id) {
   //   const query = {
   //     text: 'SELECT * FROM applications WHERE id = $1',
