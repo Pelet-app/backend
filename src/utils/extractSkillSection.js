@@ -1,20 +1,30 @@
 const SECTION_HEADERS = [
   'KEMAMPUAN',
-  'SKILLS',
-  'TECH STACK',
-  'TOOLS',
-  'HARD SKILL',
-  'SOFTWARE SKILL',
+  'KEAHLIAN',
+  'KOMPETENSI',
+  'SKILLS?',
+  'TECH(?:NICAL)?\\s+SKILLS?',
+  'TECH\\s+STACK',
+  'TOOLS?',
+  'HARD\\s+SKILLS?',
+  'SOFTWARE\\s+SKILLS?',
+  'CORE\\s+COMPETENCIES',
 ];
 
 const STOP_HEADERS = [
   'PENDIDIKAN',
+  'EDUCATION',
   'PENGALAMAN',
+  'EXPERIENCE',
   'PROJECT',
   'PROYEK',
+  'CERTIFICATE',
+  'CERTIFICATES',
   'SERTIFIKAT',
   'ORGANISASI',
+  'ORGANIZATION',
   'KONTAK',
+  'CONTACT',
 ];
 
 export const extractSkillSection = (cvText) => {
