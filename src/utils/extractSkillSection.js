@@ -16,34 +16,50 @@ const STOP_HEADERS = [
   'EDUCATION',
   'PENGALAMAN',
   'EXPERIENCE',
+  'RIWAYAT ORGANISASI',
+  'ORGANISASI',
+  'ORGANIZATION',
   'PROJECT',
+  'PROJECTS',
   'PROYEK',
   'CERTIFICATE',
   'CERTIFICATES',
   'SERTIFIKAT',
-  'ORGANISASI',
-  'ORGANIZATION',
+  'PENGHARGAAN',
+  'AWARDS',
   'KONTAK',
   'CONTACT',
+  'BAHASA',
+  'LANGUAGE',
+  'HOBI',
+  'HOBBIES',
+  'REFERENSI',
+  'REFERENCE',
 ];
 
 export const extractSkillSection = (cvText) => {
   if (!cvText) return '';
 
-  const pattern = new RegExp(
-    `(?:${SECTION_HEADERS.join('|')})\\s*:?([\\s\\S]*?)(?:${STOP_HEADERS.join('|')}|$)`,
-    'i'
-  );
+  const patterns = [
+    /Hard Skills?\s*:?\s*([\s\S]*?)(?=Soft Skills?|Software Skills?|$)/i,
+    /Soft Skills?\s*:?\s*([\s\S]*?)(?=Software Skills?|$)/i,
+    /Software Skills?\s*:?\s*([\s\S]*?)(?=$)/i,
+  ];
 
-  const match = cvText.match(pattern);
+  const skills = [];
 
-  if (!match) {
-    return '';
-  }
+  patterns.forEach((pattern) => {
+    const match = cvText.match(pattern);
 
-  return match[1]
-    .replace(/\n/g, ' ')
+    if (match?.[1]) {
+      skills.push(match[1].trim());
+    }
+  });
+
+  return skills
+    .join(' ')
     .replace(/\r/g, ' ')
+    .replace(/\n/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 };

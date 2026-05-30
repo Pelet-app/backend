@@ -28,6 +28,9 @@ export const uploadResume = async (req, res, next) => {
       try {
         cvText = await extractCvText(req.file.path);
         compressedCv = extractSkillSection(cvText);
+
+        console.log('=== SKILL SECTION ===');
+        console.log(compressedCv);
       } catch (error) {
         console.error(error);
       }
