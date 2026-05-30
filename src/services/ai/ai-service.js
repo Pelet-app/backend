@@ -17,3 +17,21 @@ export const matchJobsAI = async ({ cv_text, jobs }) => {
 
   return response.data;
 };
+
+export const interviewAI = async ({ cv_text, job_text }) => {
+  const response = await axios.post(
+    'https://egoekosetio-capstone-ai.hf.space/api/v1/mock-interview',
+    {
+      cv_text,
+      job_text,
+      skkni_units: [] // Placeholder, you can replace this with actual SKKNI units if needed
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  return response.data;
+};

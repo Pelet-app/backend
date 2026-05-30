@@ -169,6 +169,115 @@ class AIRepositories {
 
     return result.rows;
   }
+
+  async getRecommendationById(user_id, recommendation_id) {
+    const query = {
+      text: `
+      SELECT
+        r.id,
+        r.match_score,
+        r.ai_analysis,
+        r.top_units,
+        r.gap_units,
+
+        d.filename,
+
+        j.id AS job_id,
+        j.title,
+        j.description
+
+      FROM recommended_jobs r
+
+      JOIN jobs j
+      ON j.id = r.job_id
+
+      JOIN documents d
+      ON d.id = r.document_id
+
+      WHERE r.user_id = $1
+      AND r.id = $2
+
+      ORDER BY r.created_at ASC
+    `,
+      values: [user_id, recommendation_id],
+    };
+
+    const result =
+      await this.pool.query(query);
+
+    return result.rows[0];
+  }
+
+  async getRecommendationByUserIdAndJobId(user_id, job_id) {
+    const query = {
+      text: `
+      SELECT
+        r.id,
+        r.document_id,
+        r.match_score,
+        r.ai_analysis,
+        r.top_units,
+        r.gap_units,
+
+        d.filename,
+
+        j.id AS job_id,
+        j.title,
+        j.description
+
+      FROM recommended_jobs r
+
+      JOIN jobs j
+      ON j.id = r.job_id
+
+      JOIN documents d
+      ON d.id = r.document_id
+
+      WHERE r.user_id = $1
+      AND r.job_id = $2
+
+      ORDER BY r.created_at DESC
+      LIMIT 1
+    `,
+      values: [user_id, job_id],
+    };
+
+    const result =
+      await this.pool.query(query);
+
+    return result.rows[0];
+  }
+
+  async getDocumentById(document_id) {
+    const query = {
+      text: `
+        SELECT id, compressed_cv
+        FROM documents
+        WHERE id = $1
+      `,
+      values: [document_id],
+    };
+
+    const result = await this.pool.query(query);
+
+    return result.rows[0];
+  }
+
+  async getJobById(job_id) {
+    const query = {
+      text: `
+        SELECT id, title, description
+        FROM jobs
+        WHERE id = $1
+      `,
+      values: [job_id],
+    };
+
+    const result = await this.pool.query(query);
+
+    return result.rows[0];
+  }
 }
+
 
 export default AIRepositories;

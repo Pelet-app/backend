@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import AIRepositories from './ai-repositories.js';
-import { matchJobsAI } from './ai-service.js';
+import { matchJobsAI, interviewAI } from './ai-service.js';
 import { nanoid } from 'nanoid';
 import NotFoundError from '../../exceptions/not-found-error.js';
 import InvariantError from '../../exceptions/invariant-error.js';
@@ -120,6 +120,64 @@ export const getRecommendationsByDocumentId = async (req, res, next) => {
     return res.status(200).json({
       status: 'success',
       data: recommendation,
+    });
+
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const interviewMock = async (req, res, next) => {
+  try {
+    const user_id = req.user.id;
+    const { id: job_id } = req.params;
+
+    // 1. Ambil document_id dari table recommended_jobs berdasarkan user_id dan job_id
+    const recommendation = await aiRepositories.getRecommendationByUserIdAndJobId(user_id, job_id);
+
+    if (!recommendation) {
+      throw new NotFoundError(
+        'Rekomendasi tidak ditemukan untuk pekerjaan ini, pastikan Anda sudah mendapatkan rekomendasi untuk pekerjaan ini'
+      );
+    }
+
+    const top_units = recommendation.top_units;
+    const document_id = recommendation.document_id;
+
+    // 2. Ambil compressed_cv dari document_id
+    const document = await aiRepositories.getDocumentById(document_id);
+
+
+    if (!document || !document.compressed_cv) {
+      throw new NotFoundError(
+        'Resume tidak ditemukan untuk dokumen ini'
+      );
+    }
+
+    const cv_text = document.compressed_cv;
+
+    // 3. Ambil job description berdasarkan job_id
+    const job = await aiRepositories.getJobById(job_id);
+
+    if (!job) {
+      throw new NotFoundError(
+        'Pekerjaan tidak ditemukan'
+      );
+    }
+
+    // 4. Mapping payload AI
+    const job_text = `${job.title} ${job.description}`;
+
+    // 5. Call AI service
+    const aiResult = await interviewAI({
+      cv_text,
+      job_text,
+      skkni_units: top_units.map((u) => `${u.kode_unit} - ${u.judul_unit}`)
+    });
+
+    return res.status(200).json({
+      status: 'success',
+      data: aiResult,
     });
 
   } catch (err) {
