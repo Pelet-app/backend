@@ -49,6 +49,10 @@ export const up = (pgm) => {
       type: 'JSONB',
       default: pgm.func('\'[]\'::jsonb'),
     },
+    missing_skills: {
+      type: 'JSONB',
+      default: pgm.func('\'[]\'::jsonb'),
+    },
     created_at: {
       type: 'TIMESTAMPTZ',
       notNull: true,

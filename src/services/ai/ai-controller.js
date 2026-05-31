@@ -96,6 +96,8 @@ export const getRecommendedJobs = async (req, res, next) => {
             item.top_units || [],
           gap_units:
             item.gap_units || [],
+          missing_skills:
+            item.missing_skills || [],
         });
     }
 
