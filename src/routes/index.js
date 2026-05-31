@@ -17,6 +17,9 @@ router.use('/', jobs);
 router.use('/', applications);
 router.use('/', resumes);
 router.use('/', aiRoutes);
+router.get('/', (req, res) => {
+  res.json({ status: 'online' });
+});
 
 
 export default router;

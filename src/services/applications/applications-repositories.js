@@ -102,14 +102,36 @@ class ApplicationsRepositories {
     const query = {
       text: `
       SELECT
-        a.id AS application_id, a.status, a.created_at AS applied_at,
-        u.id AS applicant_id, u.name, u.email,
-        p.full_name, p.phone_number, p.avatar_url, p.applicant_data,
-        d.id AS document_id, d.path AS resume_path,  d.extracted_skills
+        a.id AS application_id,
+        a.status,
+        a.created_at AS applied_at,
+
+        u.id AS applicant_id,
+        u.name,
+        u.email,
+
+        p.full_name,
+        p.phone_number,
+        p.avatar_url,
+        p.applicant_data,
+
+        d.id AS document_id,
+        d.path AS resume_path,
+        d.extracted_skills,
+
+        r.match_score
+
       FROM applications a
-      JOIN jobs j ON j.id = a.job_id
-      JOIN users u ON u.id = a.user_id
-      LEFT JOIN profiles p ON p.user_id = u.id
+
+      JOIN jobs j
+        ON j.id = a.job_id
+
+      JOIN users u
+        ON u.id = a.user_id
+
+      LEFT JOIN profiles p
+        ON p.user_id = u.id
+
       LEFT JOIN (
         SELECT DISTINCT ON (user_id)
           id,
@@ -117,12 +139,20 @@ class ApplicationsRepositories {
           path,
           extracted_skills
         FROM documents
-        ORDER BY user_id, id DESC
+        ORDER BY user_id, created_at DESC
       ) d
         ON d.user_id = u.id
+
+      LEFT JOIN recommended_jobs r
+        ON r.user_id = a.user_id
+        AND r.job_id = a.job_id
+
       WHERE a.job_id = $1
       AND j.hrd_id = $2
-      ORDER BY a.created_at DESC
+
+      ORDER BY
+        r.match_score DESC NULLS LAST,
+        a.created_at DESC
     `,
       values: [job_id, user_id],
     };
@@ -132,37 +162,72 @@ class ApplicationsRepositories {
     return result.rows;
   }
 
-  async getApplicationById({ user_id, job_id, application_id, }) {
+  async getApplicationById({
+    user_id,
+    job_id,
+    application_id,
+  }) {
     const query = {
       text: `
       SELECT
-        a.id AS application_id, a.status, a.created_at AS applied_at,
-        u.id AS applicant_id, u.name, u.email,
-        p.full_name, p.phone_number, p.address, p.avatar_url, p.applicant_data,
-        d.id AS document_id, d.filename, d.path AS resume_path, d.extracted_skills
+        a.id AS application_id,
+        a.status,
+        a.created_at AS applied_at,
+
+        u.id AS applicant_id,
+        u.name,
+        u.email,
+
+        p.full_name,
+        p.phone_number,
+        p.address,
+        p.avatar_url,
+        p.applicant_data,
+
+        d.id AS document_id,
+        d.filename,
+        d.path AS resume_path,
+        d.cv_text,
+        d.extracted_skills,
+
+        r.match_score,
+        r.ai_analysis,
+        r.top_units,
+        r.gap_units
+
       FROM applications a
+
       JOIN jobs j
         ON j.id = a.job_id
+
       JOIN users u
         ON u.id = a.user_id
+
       LEFT JOIN profiles p
         ON p.user_id = u.id
+
       LEFT JOIN (
         SELECT DISTINCT ON (user_id)
           id,
           user_id,
           filename,
           path,
+          cv_text,
           extracted_skills
         FROM documents
-        ORDER BY user_id, id DESC
+        ORDER BY user_id, created_at DESC
       ) d
         ON d.user_id = u.id
+
+      LEFT JOIN recommended_jobs r
+        ON r.user_id = a.user_id
+        AND r.job_id = a.job_id
+
       WHERE a.id = $1
       AND a.job_id = $2
       AND j.hrd_id = $3
     `,
-      values: [application_id, job_id, user_id,],
+      values: [application_id, job_id, user_id],
     };
 
     const result = await this.pool.query(query);
