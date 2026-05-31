@@ -84,12 +84,14 @@ class AIRepositories {
     ai_analysis,
     top_units,
     gap_units,
-    missing_skills
+    missing_skills,
+    matched_skills,
+    kategori,
   }) {
     const query = {
       text: `
-        INSERT INTO recommended_jobs (id, user_id, document_id, job_id, match_score, ai_analysis, top_units, gap_units, missing_skills)
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
+        INSERT INTO recommended_jobs (id, user_id, document_id, job_id, match_score, ai_analysis, top_units, gap_units, missing_skills, matched_skills, kategori)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
         RETURNING *
       `,
       values: [
@@ -102,6 +104,8 @@ class AIRepositories {
         JSON.stringify(top_units),
         JSON.stringify(gap_units),
         JSON.stringify(missing_skills),
+        JSON.stringify(matched_skills),
+        kategori,
       ],
     };
 
@@ -120,6 +124,8 @@ class AIRepositories {
         r.top_units,
         r.gap_units,
         r.missing_skills,
+        r.matched_skills,
+        r.kategori,
         d.filename,
 
         j.id AS job_id,
@@ -176,6 +182,8 @@ class AIRepositories {
         r.top_units,
         r.gap_units,
         r.missing_skills,
+        r.matched_skills,
+        r.kategori,
         d.filename,
 
         j.id AS job_id,
@@ -214,6 +222,8 @@ class AIRepositories {
         r.top_units,
         r.gap_units,
         r.missing_skills,
+        r.matched_skills,
+        r.kategori,
         d.filename,
 
         j.id AS job_id,
@@ -253,7 +263,8 @@ class AIRepositories {
         r.top_units,
         r.gap_units,
         r.missing_skills,
-
+        r.matched_skills,
+        r.kategori,
         d.filename,
 
         j.id AS job_id,

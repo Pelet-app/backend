@@ -79,7 +79,7 @@ export const getRecommendedJobs = async (req, res, next) => {
           company_website: job?.company_website,
           hrd_position: job?.hrd_position,
         };
-      });;
+      });
 
     // 6. Save recommendation baru
     for (const item of topRecommendations) {
@@ -98,6 +98,9 @@ export const getRecommendedJobs = async (req, res, next) => {
             item.gap_units || [],
           missing_skills:
             item.missing_skills || [],
+          matched_skills:
+            item.matched_skills || [],
+          kategori: item.kategori || null,
         });
     }
 
