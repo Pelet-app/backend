@@ -58,7 +58,28 @@ export const getRecommendedJobs = async (req, res, next) => {
     });
 
     // 5. Ambil top 3
-    const topRecommendations = aiResult.results.sort((a, b) => b.match_score - a.match_score).slice(0, 3);
+    const topRecommendations = aiResult.results
+      .sort((a, b) => b.match_score - a.match_score)
+      .slice(0, 3)
+      .map((recommendation) => {
+        const job = jobs.find(
+          (job) => job.id === recommendation.job_id
+        );
+
+        return {
+          ...recommendation,
+
+          title: job?.title,
+          description: job?.description,
+
+          hrd_id: job?.hrd_id,
+          hrd_name: job?.hrd_name,
+
+          company_name: job?.company_name,
+          company_website: job?.company_website,
+          hrd_position: job?.hrd_position,
+        };
+      });;
 
     // 6. Save recommendation baru
     for (const item of topRecommendations) {

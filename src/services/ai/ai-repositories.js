@@ -46,13 +46,28 @@ class AIRepositories {
   async getOpenJobs() {
     const query = {
       text: `
-        SELECT
-          id,
-          title,
-          description
-        FROM jobs
-        WHERE status = 'open'
-      `,
+      SELECT
+        j.id,
+        j.title,
+        j.description,
+        j.hrd_id,
+
+        u.name AS hrd_name,
+
+        p.hrd_data->>'company_name' AS company_name,
+        p.hrd_data->>'company_website' AS company_website,
+        p.hrd_data->>'position' AS hrd_position
+
+      FROM jobs j
+
+      JOIN users u
+        ON u.id = j.hrd_id
+
+      LEFT JOIN profiles p
+        ON p.user_id = u.id
+
+      WHERE j.status = 'open'
+    `,
     };
 
     const result = await this.pool.query(query);
@@ -95,32 +110,49 @@ class AIRepositories {
   async getRecommendationsByUserId(user_id) {
     const query = {
       text: `
-        SELECT
-          r.id,
-          r.document_id,
-          r.match_score,
-          r.ai_analysis,
-          r.top_units,
-          r.gap_units,
+      SELECT
+        r.id,
+        r.document_id,
+        r.match_score,
+        r.ai_analysis,
+        r.top_units,
+        r.gap_units,
 
-          d.filename,
+        d.filename,
 
-          j.id AS job_id,
-          j.title,
-          j.description
+        j.id AS job_id,
+        j.title,
+        j.description,
+        j.job_type,
+        j.experience_level,
+        j.location_type,
+        j.status,
 
-        FROM recommended_jobs r
+        u.id AS hrd_id,
+        u.name AS hrd_name,
 
-        JOIN jobs j
+        p.hrd_data->>'company_name' AS company_name,
+        p.hrd_data->>'company_website' AS company_website,
+        p.hrd_data->>'position' AS hrd_position
+
+      FROM recommended_jobs r
+
+      JOIN jobs j
         ON j.id = r.job_id
 
-        JOIN documents d
+      JOIN documents d
         ON d.id = r.document_id
 
-        WHERE r.user_id = $1
+      JOIN users u
+        ON u.id = j.hrd_id
 
-        ORDER BY r.created_at ASC
-      `,
+      LEFT JOIN profiles p
+        ON p.user_id = u.id
+
+      WHERE r.user_id = $1
+
+      ORDER BY r.match_score DESC
+    `,
       values: [user_id],
     };
 
