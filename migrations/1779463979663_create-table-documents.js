@@ -41,6 +41,10 @@ export const up = (pgm) => {
       type: 'TEXT',
       notNull: true
     },
+    compressedCv: {
+      type: 'TEXT',
+      notNull: true
+    }
   });
 };
 
